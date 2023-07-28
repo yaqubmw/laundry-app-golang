@@ -108,7 +108,7 @@ func (p *ProductController) findAllHandlerForm(products []model.Product, paging 
 		fmt.Printf("RowsPerPage: %d \n", paging.RowsPerPage)
 		fmt.Printf("TotalPages: %d \n", paging.TotalPages)
 		fmt.Printf("TotalRows: %d \n", paging.TotalRows)
-
+		fmt.Println()
 	}
 }
 

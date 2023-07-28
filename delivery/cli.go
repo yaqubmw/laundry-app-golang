@@ -12,8 +12,10 @@ import (
 
 type Console struct {
 	// semua usecase taruh disini
-	uomUC     usecase.UomUseCase
-	productUC usecase.ProductUseCase
+	uomUC      usecase.UomUseCase
+	productUC  usecase.ProductUseCase
+	customerUC usecase.CustomerUseCase
+	employeeUC usecase.EmployeeUseCase
 }
 
 func (c *Console) mainMenuForm() {
@@ -40,9 +42,9 @@ func (c *Console) Run() {
 		case "2":
 			controller.NewProductController(c.productUC).HandlerMainForm()
 		case "3":
-			fmt.Println("Master Customer")
+			controller.NewCustomerController(c.customerUC).HandlerMainForm()
 		case "4":
-			fmt.Println("Master Employee")
+			controller.NewEmployeeController(c.employeeUC).HandlerMainForm()
 		case "5":
 			fmt.Println("Transaksi")
 		case "6":
@@ -60,10 +62,16 @@ func NewConsole() *Console {
 	db := dbConn.Conn()
 	uomRepo := repository.NewUomRepository(db)
 	productRepo := repository.NewProductRepository(db)
+	customerRepo := repository.NewCustomerRepository(db)
+	employeeRepo := repository.NewEmployeeRepository(db)
 	uomUseCase := usecase.NewUomUseCase(uomRepo)
 	productUseCase := usecase.NewProductUseCase(productRepo, uomUseCase)
+	customerUseCase := usecase.NewCustomerUseCase(customerRepo)
+	employeeUseCase := usecase.NewEmployeeUseCase(employeeRepo)
 	return &Console{
 		uomUC:     uomUseCase,
 		productUC: productUseCase,
+		customerUC: customerUseCase,
+		employeeUC: employeeUseCase,
 	}
 }

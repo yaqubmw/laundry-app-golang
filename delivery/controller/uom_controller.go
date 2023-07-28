@@ -131,4 +131,4 @@ func (u *UomController) uomGetForm() {
 
 func NewUomController(usecase usecase.UomUseCase) *UomController {
 	return &UomController{uomUC: usecase}
-}
+} 
