@@ -3,6 +3,8 @@ package config
 import (
 	"database/sql"
 	"fmt"
+
+	_ "github.com/lib/pq"
 )
 
 type DbConnection interface {
