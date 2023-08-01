@@ -1,4 +1,4 @@
-package controller
+package cli
 
 import (
 	"enigma-laundry-apps/model"
@@ -131,4 +131,4 @@ func (u *UomController) uomGetForm() {
 
 func NewUomController(usecase usecase.UomUseCase) *UomController {
 	return &UomController{uomUC: usecase}
-} 
+}

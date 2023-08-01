@@ -1,4 +1,4 @@
-package controller
+package cli
 
 import (
 	"enigma-laundry-apps/model"

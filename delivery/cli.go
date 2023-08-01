@@ -2,7 +2,7 @@ package delivery
 
 import (
 	"enigma-laundry-apps/config"
-	"enigma-laundry-apps/delivery/controller"
+	"enigma-laundry-apps/delivery/controller/cli"
 	"enigma-laundry-apps/repository"
 	"enigma-laundry-apps/usecase"
 	"enigma-laundry-apps/utils/exceptions"
@@ -38,13 +38,13 @@ func (c *Console) Run() {
 		fmt.Scanln(&selectedMenu)
 		switch selectedMenu {
 		case "1":
-			controller.NewUomController(c.uomUC).UomMenuForm()
+			cli.NewUomController(c.uomUC).UomMenuForm()
 		case "2":
-			controller.NewProductController(c.productUC).HandlerMainForm()
+			cli.NewProductController(c.productUC).HandlerMainForm()
 		case "3":
-			controller.NewCustomerController(c.customerUC).HandlerMainForm()
+			cli.NewCustomerController(c.customerUC).HandlerMainForm()
 		case "4":
-			controller.NewEmployeeController(c.employeeUC).HandlerMainForm()
+			cli.NewEmployeeController(c.employeeUC).HandlerMainForm()
 		case "5":
 			fmt.Println("Transaksi")
 		case "6":
@@ -69,8 +69,8 @@ func NewConsole() *Console {
 	customerUseCase := usecase.NewCustomerUseCase(customerRepo)
 	employeeUseCase := usecase.NewEmployeeUseCase(employeeRepo)
 	return &Console{
-		uomUC:     uomUseCase,
-		productUC: productUseCase,
+		uomUC:      uomUseCase,
+		productUC:  productUseCase,
 		customerUC: customerUseCase,
 		employeeUC: employeeUseCase,
 	}

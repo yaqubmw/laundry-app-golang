@@ -6,6 +6,6 @@ import (
 
 func main() {
 
-	delivery.NewConsole().Run()
+	delivery.NewServer().Run()
 
 }
