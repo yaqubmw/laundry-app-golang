@@ -12,9 +12,10 @@ import (
 )
 
 type Server struct {
-	uomUC  usecase.UomUseCase
-	engine *gin.Engine
-	host   string
+	uomUC     usecase.UomUseCase
+	productUC usecase.ProductUseCase
+	engine    *gin.Engine
+	host      string
 }
 
 func (s *Server) Run() {
@@ -30,6 +31,7 @@ func (s *Server) initController() {
 
 	// semua controller disini
 	api.NewUomController(s.uomUC, s.engine)
+	api.NewProductController(s.engine, s.productUC)
 
 }
 
@@ -40,12 +42,15 @@ func NewServer() *Server {
 	db := dbConn.Conn()
 	uomRepo := repository.NewUomRepository(db)
 	uomUseCase := usecase.NewUomUseCase(uomRepo)
+	productRepo := repository.NewProductRepository(db)
+	productUseCase := usecase.NewProductUseCase(productRepo, uomUseCase)
 
 	engine := gin.Default()
 	host := fmt.Sprintf("%s:%s", cfg.ApiHost, cfg.ApiPort)
 	return &Server{
-		uomUC:  uomUseCase,
-		engine: engine,
-		host:   host,
+		uomUC:     uomUseCase,
+		productUC: productUseCase,
+		engine:    engine,
+		host:      host,
 	}
 }
