@@ -3,17 +3,20 @@ package delivery
 import (
 	"enigma-laundry-apps/config"
 	"enigma-laundry-apps/delivery/controller/api"
+	"enigma-laundry-apps/delivery/middleware"
 	"enigma-laundry-apps/manager"
 	"enigma-laundry-apps/utils/exceptions"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type Server struct {
 	useCaseManager manager.UseCaseManager
 	engine         *gin.Engine
 	host           string
+	log            *logrus.Logger
 }
 
 func (s *Server) Run() {
@@ -25,6 +28,7 @@ func (s *Server) Run() {
 }
 
 func (s *Server) initController() {
+	s.engine.Use(middleware.LogRequestMiddleware(s.log))
 	// semua controller disini
 	api.NewUomController(s.useCaseManager.UomUseCase(), s.engine)
 	api.NewProductController(s.engine, s.useCaseManager.ProductUseCase())
@@ -45,5 +49,6 @@ func NewServer() *Server {
 		useCaseManager: useCaseManager,
 		engine:         engine,
 		host:           host,
+		log:            logrus.New(),
 	}
 }
