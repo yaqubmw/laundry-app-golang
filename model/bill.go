@@ -3,19 +3,19 @@ package model
 import "time"
 
 type Bill struct {
-	Id          string
-	BillDate    time.Time
-	EntryDate   time.Time
-	FinishDate  time.Time
-	EmployeeId  string
-	CustomerId  string
-	BillDetails []BillDetail
+	Id          string       `json:"id"`
+	BillDate    time.Time    `json:"billDate"`
+	EntryDate   time.Time    `json:"entryDate"`
+	FinishDate  time.Time    `json:"finishDate"`
+	EmployeeId  string       `json:"employeeId"`
+	CustomerId  string       `json:"customerId"`
+	BillDetails []BillDetail `json:"billDetails"`
 }
 
 type BillDetail struct {
-	Id           string
-	BillId       string
-	ProductId    string
-	ProductPrice int
-	Qty          int
+	Id           string `json:"id"`
+	BillId       string `json:"billId"`
+	ProductId    string `json:"productId"`
+	ProductPrice int    `json:"productPrice"`
+	Qty          int    `json:"qty"`
 }

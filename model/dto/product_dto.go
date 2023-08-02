@@ -1,8 +1,8 @@
-package model
+package dto
 
-type Product struct {
+type ProductRequestDto struct {
 	Id    string `json:"id"`
 	Name  string `json:"name"`
 	Price int    `json:"price"`
-	Uom   Uom    `json:"uom"`
+	UomId string `json:"uomId"`
 }

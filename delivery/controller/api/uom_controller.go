@@ -3,6 +3,8 @@ package api
 import (
 	"enigma-laundry-apps/model"
 	"enigma-laundry-apps/usecase"
+	"enigma-laundry-apps/utils/common"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,23 +18,24 @@ func (u *UomController) createHandler(c *gin.Context) {
 	var uom model.Uom
 	// cek error bind body JSON
 	if err := c.ShouldBindJSON(&uom); err != nil {
-		c.JSON(400, gin.H{"err": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return // agar tidak diteruskan ke bawah
 	}
 	// cek error ketika sever tidak merespon/terjadi kesalahan pada server
+	uom.Id = common.GenerateID()
 	if err := u.uomUC.RegisterNewUom(uom); err != nil {
-		c.JSON(500, gin.H{"err": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return // agar tidak diteruskan ke bawah
 	}
 
-	c.JSON(201, uom)
+	c.JSON(http.StatusCreated, uom)
 
 }
 
 func (u *UomController) listHandler(c *gin.Context) {
 	uoms, err := u.uomUC.FindAllUom()
 	if err != nil {
-		c.JSON(500, gin.H{"err": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 
@@ -51,7 +54,7 @@ func (u *UomController) getHandler(c *gin.Context) {
 	id := c.Param("id")
 	uom, err := u.uomUC.FindByIdUom(id)
 	if err != nil {
-		c.JSON(500, gin.H{"err": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 
@@ -70,12 +73,12 @@ func (u *UomController) updateHandler(c *gin.Context) {
 	var uom model.Uom
 
 	if err := c.ShouldBindJSON(&uom); err != nil {
-		c.JSON(400, gin.H{"err": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
 
 	if err := u.uomUC.UpdateUom(uom); err != nil {
-		c.JSON(500, gin.H{"err": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 
@@ -86,7 +89,7 @@ func (u *UomController) deleteHandler(c *gin.Context) {
 	id := c.Param("id")
 	err := u.uomUC.DeleteUom(id)
 	if err != nil {
-		c.JSON(500, gin.H{"err": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 
@@ -102,11 +105,12 @@ func NewUomController(usecase usecase.UomUseCase, r *gin.Engine) *UomController 
 
 	//  daftarkan semua url path disini
 	// /uom -> GET, POST, PUT, DELETE
-	r.POST("/uoms", controller.createHandler)
-	r.GET("/uoms", controller.listHandler)
-	r.GET("/uoms/:id", controller.getHandler)
-	r.PUT("/uoms", controller.updateHandler)
-	r.DELETE("/uoms/:id", controller.deleteHandler)
+	rg := r.Group("/api/v1")
+	rg.POST("/uoms", controller.createHandler)
+	rg.GET("/uoms", controller.listHandler)
+	rg.GET("/uoms/:id", controller.getHandler)
+	rg.PUT("/uoms", controller.updateHandler)
+	rg.DELETE("/uoms/:id", controller.deleteHandler)
 	return &controller
 
 }

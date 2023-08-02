@@ -1,8 +1,9 @@
 package model
 
 type Customer struct {
-	Id          string
-	Name        string
-	PhoneNumber string
-	Address     string
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	PhoneNumber string `json:"phoneNumber"`
+	Address     string `json:"address"`
+
 }

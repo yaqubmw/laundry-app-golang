@@ -4,6 +4,7 @@ import (
 	"enigma-laundry-apps/model"
 	"enigma-laundry-apps/model/dto"
 	"enigma-laundry-apps/usecase"
+	"enigma-laundry-apps/utils/common"
 	"net/http"
 	"strconv"
 
@@ -16,18 +17,24 @@ type ProductController struct {
 }
 
 func (p *ProductController) createHandler(c *gin.Context) {
-	var product model.Product
-	if err := c.ShouldBindJSON(&product); err != nil {
+	var productRequest dto.ProductRequestDto
+	if err := c.ShouldBindJSON(&productRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
-	if err := p.productUC.RegisterNewProduct(product); err != nil {
+	var newProduct model.Product
+	productRequest.Id = common.GenerateID()
+	newProduct.Id = productRequest.Id
+	newProduct.Name = productRequest.Name
+	newProduct.Uom.Id = productRequest.UomId
+	newProduct.Price = productRequest.Price
+	if err := p.productUC.RegisterNewProduct(newProduct); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, product)
-}
 
+	c.JSON(http.StatusCreated, productRequest)
+}
 func (p *ProductController) listHandler(c *gin.Context) {
 	page, _ := strconv.Atoi(c.Query("page"))
 	limit, _ := strconv.Atoi(c.Query("limit"))
@@ -44,7 +51,6 @@ func (p *ProductController) listHandler(c *gin.Context) {
 		"code":        200,
 		"description": "Get All Data Successfully",
 	}
-
 	c.JSON(http.StatusOK, gin.H{
 		"status": status,
 		"data":   products,
@@ -52,18 +58,55 @@ func (p *ProductController) listHandler(c *gin.Context) {
 	})
 }
 
-func (p *ProductController) getHandler(c *gin.Context) {}
+func (p *ProductController) getHandler(c *gin.Context) {
+	id := c.Param("id")
+	product, err := p.productUC.FindByIdProduct(id)
+	if err != nil {
+		c.JSON(500, gin.H{"err": err.Error()})
+		return
+	}
+	status := map[string]any{
+		"code":        200,
+		"description": "Get By Id Data Successfully",
+	}
+	c.JSON(200, gin.H{
+		"status": status,
+		"data":   product,
+	})
+}
+func (p *ProductController) updateHandler(c *gin.Context) {
+	var productRequest dto.ProductRequestDto
+	if err := c.ShouldBindJSON(&productRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
+		return
+	}
+	var newProduct model.Product
+	newProduct.Id = productRequest.Id
+	newProduct.Name = productRequest.Name
+	newProduct.Uom.Id = productRequest.UomId
+	newProduct.Price = productRequest.Price
+	if err := p.productUC.UpdateProduct(newProduct); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
+		return
+	}
 
-func (p *ProductController) updateHandler(c *gin.Context) {}
-
-func (p *ProductController) deleteHandler(c *gin.Context) {}
+	c.JSON(http.StatusOK, productRequest)
+}
+func (p *ProductController) deleteHandler(c *gin.Context) {
+	id := c.Param("id")
+	if err := p.productUC.DeleteProduct(id); err != nil {
+		c.JSON(500, gin.H{"err": err.Error()})
+		return
+	}
+	c.String(204, "")
+}
 
 func NewProductController(r *gin.Engine, usecase usecase.ProductUseCase) *ProductController {
 	controller := ProductController{
 		router:    r,
 		productUC: usecase,
 	}
-
+	// /api/v1/products
 	rg := r.Group("/api/v1")
 	rg.POST("/products", controller.createHandler)
 	rg.GET("/products", controller.listHandler)
