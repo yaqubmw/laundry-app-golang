@@ -35,6 +35,7 @@ func (s *Server) initController() {
 	api.NewCustomerController(s.engine, s.useCaseManager.CustomerUseCase())
 	api.NewEmployeeController(s.engine, s.useCaseManager.EmployeeUseCase())
 	api.NewBillController(s.engine, s.useCaseManager.BillUseCase())
+	api.NewUserController(s.engine, s.useCaseManager.UserUseCase())
 }
 
 func NewServer() *Server {
