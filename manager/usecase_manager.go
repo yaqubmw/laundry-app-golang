@@ -9,10 +9,16 @@ type UseCaseManager interface {
 	EmployeeUseCase() usecase.EmployeeUseCase
 	BillUseCase() usecase.BillUseCase
 	UserUseCase() usecase.UserUseCase
+	AuthUseCase() usecase.AuthUseCase
 }
 
 type useCaseManager struct {
 	repoManager RepoManager
+}
+
+// AuthUseCase implements UseCaseManager.
+func (u *useCaseManager) AuthUseCase() usecase.AuthUseCase {
+	return usecase.NewAuthUseCase(u.UserUseCase())
 }
 
 // UserUseCase implements UseCaseManager.

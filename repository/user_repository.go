@@ -31,7 +31,7 @@ func (u *userRepository) Create(payload model.UserCredential) error {
 // GetUsername implements UserRepository.
 func (u *userRepository) GetUsername(username string) (model.UserCredential, error) {
 	var user model.UserCredential
-	err := u.db.QueryRow("SELECT id, username, password FROM user_credential WHERE is_active = $1 AND username = $2", true, username).Scan(&user.Id, &user.Username, &user.Password)
+	err := u.db.QueryRow("SELECT id, username, password, is_active FROM user_credential WHERE is_active = $1 AND username = $2", true, username).Scan(&user.Id, &user.Username, &user.Password, &user.IsActive)
 	if err != nil {
 		return model.UserCredential{}, err
 	}
