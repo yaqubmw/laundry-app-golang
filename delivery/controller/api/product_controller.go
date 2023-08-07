@@ -4,7 +4,6 @@ import (
 	"enigma-laundry-apps/model"
 	"enigma-laundry-apps/model/dto"
 	"enigma-laundry-apps/usecase"
-	"enigma-laundry-apps/utils/common"
 	"net/http"
 	"strconv"
 
@@ -23,7 +22,7 @@ func (p *ProductController) createHandler(c *gin.Context) {
 		return
 	}
 	var newProduct model.Product
-	productRequest.Id = common.GenerateID()
+	// productRequest.Id = common.GenerateID()
 	newProduct.Id = productRequest.Id
 	newProduct.Name = productRequest.Name
 	newProduct.Uom.Id = productRequest.UomId

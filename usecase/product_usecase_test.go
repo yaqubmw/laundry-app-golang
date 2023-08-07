@@ -99,11 +99,13 @@ type ProductUseCaseTestSuite struct {
 	suite.Suite
 	repoMock    *repoMock
 	usecaseMock *usecaseMock
+	usecase     ProductUseCase
 }
 
 func (suite *ProductUseCaseTestSuite) SetupTest() {
 	suite.repoMock = new(repoMock)
 	suite.usecaseMock = new(usecaseMock)
+	suite.usecase = NewProductUseCase(suite.repoMock, suite.usecaseMock)
 }
 
 // Test Case
@@ -138,24 +140,24 @@ func (suite *ProductUseCaseTestSuite) TestRegisterNewProduct_Success() {
 	suite.usecaseMock.On("FindByIdUom", dmProduct.Uom.Id).Return(uomDummy, nil)
 	dmProduct.Uom = uomDummy
 	suite.repoMock.On("Create", dmProduct).Return(nil)
-	usecase := NewProductUseCase(suite.repoMock, suite.usecaseMock)
-	err := usecase.RegisterNewProduct(dmProduct)
+
+	err := suite.usecase.RegisterNewProduct(dmProduct)
 	assert.Nil(suite.T(), err)
 }
 
 func (suite *ProductUseCaseTestSuite) TestRegisterNewProduct_EmptyField() {
 	suite.repoMock.On("Create", model.Product{}).Return(fmt.Errorf("field requierd"))
-	usecase := NewProductUseCase(suite.repoMock, suite.usecaseMock)
-	err := usecase.RegisterNewProduct(model.Product{})
+
+	err := suite.usecase.RegisterNewProduct(model.Product{})
 	assert.Error(suite.T(), err)
 }
 
 func (suite *ProductUseCaseTestSuite) TestRegisterNewProduct_InvalidUOM() {
 	dummy := productDummy[0]
 	suite.usecaseMock.On("FindByIdUom", "1xxx").Return(model.Uom{}, fmt.Errorf("uom not found"))
-	usecase := NewProductUseCase(suite.repoMock, suite.usecaseMock)
+
 	dummy.Uom.Id = "1xxx"
-	err := usecase.RegisterNewProduct(dummy)
+	err := suite.usecase.RegisterNewProduct(dummy)
 	assert.Error(suite.T(), err)
 }
 
@@ -163,9 +165,80 @@ func (suite *ProductUseCaseTestSuite) TestRegisterNewProduct_Fail() {
 	suite.usecaseMock.On("FindByIdUom", "1").Return(uomDummy, nil)
 	productDummy[0].Uom = uomDummy
 	suite.repoMock.On("Create", productDummy[0]).Return(fmt.Errorf("failed register"))
-	usecase := NewProductUseCase(suite.repoMock, suite.usecaseMock)
-	err := usecase.RegisterNewProduct(productDummy[0])
+
+	err := suite.usecase.RegisterNewProduct(productDummy[0])
 	assert.Error(suite.T(), err)
+}
+
+func (suite *ProductUseCaseTestSuite) TestFindAllProduct_Success() {
+	dummy := productDummy
+	expectedPaging := dto.Paging{
+		Page:        1,
+		RowsPerPage: 5,
+		TotalRows:   5,
+		TotalPages:  1,
+	}
+	requestPaging := dto.PaginationParam{
+		Page:  1,
+		Limit: 5,
+	}
+
+	suite.repoMock.On("Paging", requestPaging).Return(dummy, expectedPaging, nil)
+
+	actualProduct, actualPaging, actualError := suite.usecase.FindAllProduct(requestPaging)
+	assert.Equal(suite.T(), dummy, actualProduct)
+	assert.Equal(suite.T(), expectedPaging, actualPaging)
+	assert.Nil(suite.T(), actualError)
+}
+
+func (suite *ProductUseCaseTestSuite) TestFindAllProduct_Fail() {
+
+	suite.repoMock.On("Paging", dto.PaginationParam{}).Return(nil, dto.Paging{}, fmt.Errorf("error"))
+
+	actualProduct, actualPaging, actualError := suite.usecase.FindAllProduct(dto.PaginationParam{})
+	assert.Nil(suite.T(), actualProduct)
+	assert.Equal(suite.T(), dto.Paging{}, actualPaging)
+	assert.Error(suite.T(), actualError)
+}
+
+func (suite *ProductUseCaseTestSuite) TestFindByIdProduct_Success() {
+	dummy := productDummy[0]
+	suite.repoMock.On("Get", dummy.Id).Return(dummy, nil)
+	actualProduct, actualError := suite.usecase.FindByIdProduct(dummy.Id)
+	assert.Equal(suite.T(), dummy, actualProduct)
+	assert.Nil(suite.T(), actualError)
+}
+
+func (suite *ProductUseCaseTestSuite) TestFindByIdProduct_Fail() {
+	suite.repoMock.On("Get", "1sss").Return(model.Product{}, fmt.Errorf("error"))
+	actualProduct, actualError := suite.usecase.FindByIdProduct("1sss")
+	assert.Equal(suite.T(), model.Product{}, actualProduct)
+	assert.Error(suite.T(), actualError)
+}
+
+func (suite *ProductUseCaseTestSuite) TestDeleteProduct_Success() {
+	suite.repoMock.On("Delete", productDummy[0].Id).Return(nil)
+	actualError := suite.usecase.DeleteProduct(productDummy[0].Id)
+	assert.Nil(suite.T(), actualError)
+}
+
+func (suite *ProductUseCaseTestSuite) TestDeleteProduct_Fail() {
+	suite.repoMock.On("Delete", "2xxx").Return(fmt.Errorf("error"))
+	actualError := suite.usecase.DeleteProduct("2xxx")
+	assert.Error(suite.T(), actualError)
+}
+
+func (suite *ProductUseCaseTestSuite) TestUpdateProduct_Success() {
+	payload := productDummy[0]
+	suite.repoMock.On("Update", payload).Return(nil)
+	actualError := suite.usecase.UpdateProduct(payload)
+	assert.Nil(suite.T(), actualError)
+}
+
+func (suite *ProductUseCaseTestSuite) TestUpdateProduct_Fail() {
+	suite.repoMock.On("Update", model.Product{}).Return(fmt.Errorf("error"))
+	actualError := suite.usecase.UpdateProduct(model.Product{})
+	assert.Error(suite.T(), actualError)
 }
 
 func TestProductUsecaseTestSuite(t *testing.T) {

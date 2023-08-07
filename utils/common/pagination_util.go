@@ -2,15 +2,14 @@ package common
 
 import (
 	"enigma-laundry-apps/model/dto"
-	"enigma-laundry-apps/utils/exceptions"
 	"math"
 	"os"
 	"strconv"
 )
 
 func GetPaginationParams(params dto.PaginationParam) dto.PaginationQuery {
-	err := LoadEnv()
-	exceptions.CheckErr(err)
+	// err := LoadEnv()
+	// exceptions.CheckErr(err)
 
 	var (
 		page, take, skip int
